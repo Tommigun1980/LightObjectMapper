@@ -40,3 +40,15 @@ new
      SomeProperty = businessObject.Something.Select(t => t.SomeValue);
 });
 ```
+
+### Optional automatic property type converters
+
+Optionally, property type converters can also be registered. This can be useful if the some properties are conversible but of different types, such as different types of enumerations that are conversible.
+
+To use this feature, register the type converter once:
+
+```c#
+LightObjectMapper.RegisterTypeConverter(typeof(BusinessEnum), (enumValue) => mapToOtherEnum);
+```
+
+Now, whenever a BusinessEnum is encountered in the mapping process, it will be automatically converted to the value specified by your converter. Overrides will still apply.
