@@ -1,0 +1,33 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <PackOnBuild>true</PackOnBuild>
+    <PackageVersion>1.0.0</PackageVersion>
+    <Authors>Tommi Kiviniemi</Authors>
+    <Description>Maps from one object type to another, including collections, with optional override properties. This is convenient to avoid code duplication when for example converting business objects to DTOs. This is an extremely lightweight library that does one thing and does it well.</Description>
+    <Copyright>Copyright © 2020</Copyright>
+    <Owners>Tommi Kiviniemi</Owners>
+    <Summary>A lightweight object mapper for .NET</Summary>
+    <PackageTags>object mapper, object, mapper, objectmapper, automapper, auto mapper, converter, convert, map</PackageTags>
+    <Title>LightObjectMapper</Title>
+    <PackageId>LightObjectMapper</PackageId>
+    <PackageProjectUrl>https://github.com/Tommigun1980/LightObjectMapper</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/Tommigun1980/LightObjectMapper/blob/master/LICENSE</PackageLicenseUrl>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType></DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="NuGet.Build.Packaging" Version="0.2.5-dev.8">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="LightObjectMapper.cs">
+      <IncludeInPackage>true</IncludeInPackage>
+    </Compile>
+  </ItemGroup>
+</Project>
