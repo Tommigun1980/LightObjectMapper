@@ -3,6 +3,8 @@
 
 NuGet package available at https://www.nuget.org/packages/LightObjectMapper/
 
+## Intro
+
 Maps from one object type to another, including collections, with optional override properties. This is convenient to avoid code duplication when for example converting business objects to DTOs. This is an extremely lightweight library that does one thing and does it well.
 
 ## Usage
