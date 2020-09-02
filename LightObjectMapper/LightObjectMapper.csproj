@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackOnBuild>true</PackOnBuild>
-    <PackageVersion>1.0.0</PackageVersion>
+    <PackageVersion>1.0.1</PackageVersion>
     <Authors>Tommi Kiviniemi</Authors>
     <Description>Maps from one object type to another, including collections, with optional override properties. This is convenient to avoid code duplication when for example converting business objects to DTOs. This is an extremely lightweight library that does one thing and does it well.</Description>
     <Copyright>Copyright © 2020</Copyright>

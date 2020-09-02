@@ -41,17 +41,19 @@ public static class LightObjectMapper
     private static readonly IDictionary<Type, Func<object, object>> typeConverters =
         new Dictionary<Type, Func<object, object>>();
 
-    public static TDestination MapObject<TDestination>(object source, object propertyMap = null)
+    public static TDestination MapObject<TDestination>(
+        object source, object propertyMap = null, TDestination destination = null, IEnumerable<string> ignoreProperties = null)
         where TDestination : class, new()
     {
         if (source == null)
             return null;
 
         var destinationPropertyNameToPropertyDataMap = LightObjectMapper.GetPropertyDataMap<TDestination>(source.GetType());
-        return LightObjectMapper.MapObject<TDestination>(source, propertyMap, destinationPropertyNameToPropertyDataMap);
+        return LightObjectMapper.MapObject<TDestination>(source, propertyMap, destinationPropertyNameToPropertyDataMap, destination, ignoreProperties);
     }
 
-    public static IEnumerable<TDestination> MapObjects<TSource, TDestination>(IEnumerable<TSource> sourceEnumerable, Func<TSource, object> propertyMapGetter = null)
+    public static IEnumerable<TDestination> MapObjects<TSource, TDestination>(
+        IEnumerable<TSource> sourceEnumerable, Func<TSource, object> propertyMapGetter = null, IEnumerable<string> ignoreProperties = null)
         where TDestination : class, new()
     {
         if (sourceEnumerable == null)
@@ -63,7 +65,7 @@ public static class LightObjectMapper
         foreach (var sourceElem in sourceEnumerable)
         {
             var propertyMap = propertyMapGetter?.Invoke(sourceElem);
-            var destinationElem = LightObjectMapper.MapObject<TDestination>(sourceElem, propertyMap, destinationPropertyNameToPropertyDataMap);
+            var destinationElem = LightObjectMapper.MapObject<TDestination>(sourceElem, propertyMap, destinationPropertyNameToPropertyDataMap, null, ignoreProperties);
             destination.Add(destinationElem);
         }
 
@@ -94,17 +96,22 @@ public static class LightObjectMapper
         );
     }
 
-    private static TDestination MapObject<TDestination>(object source, object propertyMap, IDictionary<string, PropertyData> destinationPropertyNameToPropertyDataMap)
+    private static TDestination MapObject<TDestination>(
+        object source, object propertyMap, IDictionary<string, PropertyData> destinationPropertyNameToPropertyDataMap,
+        TDestination destination = null, IEnumerable<string> ignoreProperties = null)
         where TDestination : class, new()
     {
         if (source == null)
             return null;
 
-        TDestination destination = new TDestination();
+        destination = destination ?? new TDestination();
 
         foreach (var propertyDataKvp in destinationPropertyNameToPropertyDataMap)
         {
             var destinationPropertyName = propertyDataKvp.Key;
+            if (ignoreProperties != null && ignoreProperties.Contains(destinationPropertyName))
+                continue;
+
             var propertyData = propertyDataKvp.Value;
 
             object sourceObject = null;
