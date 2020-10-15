@@ -1,37 +1,4 @@
-﻿/**
- * Maps from one object type to another, with optional override properties.
- * 
- * This is convenient to avoid code duplication when for example converting
- * business objects to DTOs. This is an extremely lightweight library that
- * does one thing and does it well.
- * 
- * Example: Map from a business object to a DTO:
- * var someDTO = LightObjectMapper.MapObject<DTOType>(someBusinessObject);
- * 
- * Example: Map from a business object to a DTO, while patching in some override
- * values (that may or may not exist in source object):
- * var someDTO = LightObjectMapper.MapObject<DTOType>(someBusinessObject, new
- * {
- *      SomeProperty = 4,
- *      OtherProperty = "Hello"
- * });
- * 
- * Also works with collections:
- * DTOType[] someDTOs = LightObjectMapper.MapObjects<SourceType, DTOType>(someBusinessObjectEnumerable);
- * 
- * Collection with overrides:
- * var someDTOs = LightObjectMapper.MapObjects<SourceType, DTOType>(someBusinessObjectEnumerable, (businessObject) =>
- * new
- * {
- *      SomeProperty = businessObject.Something.Select(t => t.SomeValue);
- * });
- * 
- * Advanced, optional: Type converters can also be registered.
- * ObjectMap.RegisterTypeConverter(typeof(BusinessEnum), (enumValue) => mapToOtherEnum);
- * Whenever a BusinessEnum is encountered, it will be automatically converted to mapToOtherEnum's
- * value and type, before being assigned into the destination object. Overrides still apply.
- */
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
