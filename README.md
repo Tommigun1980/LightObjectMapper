@@ -11,11 +11,13 @@ Maps from one object type to another, including collections, with optional overr
 
 LightObjectMapper copies all public properties from source object to destination object. The property types must match (see 'Optional automatic property type converters' for an exception to this rule).
 
-Map from a business object to a DTO:
+Map from one type of business object to another type DTO:
 
 ```c#
 var someDTO = LightObjectMapper.MapObject<DTOType>(someBusinessObject);
 ```
+
+Tip: The above can also be used to clone objects.
 
 Map from a business object to a DTO, while patching in some override values (that may or may not exist in source object):
 
@@ -27,13 +29,23 @@ var someDTO = LightObjectMapper.MapObject<DTOType>(someBusinessObject, new
 });
 ```
 
-Also works with collections:
+Tip: Using anonymous object overrides produces very clean code, but does not provide safety against property renaming. If this is important to you, the following is also supported:
+
+```c#
+var someDTO = LightObjectMapper.MapObject<DTOType>(someBusinessObject, new Dictionary<string, object>()
+{
+     { nameof(DTOType.SomeProperty), 4 },
+     { nameof(DTOType.OtherProperty), "Hello" }
+});
+```
+
+Mapping also works with collections:
 
 ```c#
 DTOType[] someDTOs = LightObjectMapper.MapObjects<SourceType, DTOType>(someBusinessObjectEnumerable);
 ```
 
-Collection with overrides:
+Mapping of collections with overrides:
 
 ```c#
 var someDTOs = LightObjectMapper.MapObjects<SourceType, DTOType>(someBusinessObjectEnumerable, (businessObject) =>
@@ -42,6 +54,8 @@ new
      SomeProperty = businessObject.Something.Select(t => t.SomeValue);
 });
 ```
+
+Tip: The anonymous override object can be substituted with an IDictionary<string, object>.
 
 ### Optional automatic property type converters
 
