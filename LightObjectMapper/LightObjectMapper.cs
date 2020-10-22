@@ -62,12 +62,14 @@ public static class LightObjectMapper
         var sourcePropertyInfos = sourceType.GetProperties();
         var destinationPropertyInfos = destinationType.GetProperties();
 
-        return destinationPropertyInfos.ToDictionary(t => t.Name, t =>
-            new PropertyData
-            {
-                destinationPropertyInfo = t,
-                sourcePropertyInfo = sourcePropertyInfos.FirstOrDefault(u => u.Name == t.Name)
-            }
+        return destinationPropertyInfos
+            .ToDictionary(
+                t => t.Name,
+                t => new PropertyData
+                {
+                    destinationPropertyInfo = t,
+                    sourcePropertyInfo = sourcePropertyInfos.FirstOrDefault(u => u.Name == t.Name)
+                }
         );
     }
 
@@ -90,21 +92,29 @@ public static class LightObjectMapper
             if (ignoreProperties != null && ignoreProperties.Contains(propertyName))
                 continue;
 
-            // get from override or source object
+            // get from overrides
             object sourcePropertyValue;
             if (!LightObjectMapper.GetFromOverrides(overrides, propertyName, out sourcePropertyValue))
-                sourcePropertyValue = propertyData.sourcePropertyInfo?.GetValue(source);
+            {
+                // not in overrides
+                if (propertyData.sourcePropertyInfo == null) // not in source property either, ignore
+                    continue;
 
-            if (sourcePropertyValue == null && ignoreSourceNullValues)
-                continue;
+                sourcePropertyValue = propertyData.sourcePropertyInfo.GetValue(source); // fetch from source property
+                if (sourcePropertyValue == null && ignoreSourceNullValues) // ignore if source null values are ignored
+                    continue;
+            }
 
             // apply type converter
             if (LightObjectMapper.typeConverters.Count > 0)
             {
-                Func<object, object> typeConverter;
-                var propertyType = LightObjectMapper.GetPropertyType(sourcePropertyValue, propertyName, propertyData);
-                if (LightObjectMapper.typeConverters.TryGetValue(propertyType, out typeConverter) && typeConverter != null)
-                    sourcePropertyValue = typeConverter(sourcePropertyValue);
+                var sourceObjectType = sourcePropertyValue?.GetType() ?? propertyData.sourcePropertyInfo?.PropertyType;
+                if (sourceObjectType != null)
+                {
+                    Func<object, object> typeConverter;
+                    if (LightObjectMapper.typeConverters.TryGetValue(sourceObjectType, out typeConverter) && typeConverter != null)
+                        sourcePropertyValue = typeConverter(sourcePropertyValue);
+                }
             }
 
             // set in destination object
@@ -133,9 +143,5 @@ public static class LightObjectMapper
             out_propertyValue = overridePropertyInfo.GetValue(overrides);
             return true;
         }
-    }
-    private static Type GetPropertyType(object propertyValue, string propertyName, PropertyData propertyData)
-    {
-        return propertyValue?.GetType() ?? propertyData.sourcePropertyInfo?.PropertyType ?? propertyData.destinationPropertyInfo.PropertyType;
     }
 }
