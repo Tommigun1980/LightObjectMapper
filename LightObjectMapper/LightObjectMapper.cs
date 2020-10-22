@@ -9,18 +9,24 @@ public static class LightObjectMapper
         new Dictionary<Type, Func<object, object>>();
 
     public static TDestination MapObject<TDestination>(
-        object source, object overrides = null, TDestination destination = null, IEnumerable<string> ignoreProperties = null)
+        object source, TDestination destination, object overrides = null, IEnumerable<string> ignoreProperties = null, bool ignoreSourceNullValues = false)
         where TDestination : class, new()
     {
         if (source == null)
             return null;
 
         var propertyDataMap = LightObjectMapper.GetPropertyDataMap(source.GetType(), typeof(TDestination));
-        return LightObjectMapper.MapObject<TDestination>(source, propertyDataMap, overrides, destination, ignoreProperties);
+        return LightObjectMapper.MapObject<TDestination>(source, propertyDataMap, overrides, destination, ignoreProperties, ignoreSourceNullValues);
+    }
+    public static TDestination MapObject<TDestination>(
+        object source, object overrides = null, IEnumerable<string> ignoreProperties = null)
+        where TDestination : class, new()
+    {
+        return LightObjectMapper.MapObject<TDestination>(source, null, overrides, ignoreProperties, true);
     }
 
     public static IEnumerable<TDestination> MapObjects<TSource, TDestination>(
-        IEnumerable<TSource> sourceEnumerable, Func<TSource, object> overridesGetter = null, IEnumerable<string> ignoreProperties = null)
+        IEnumerable<TSource> sourceEnumerable, Func<TSource, object> overridesGetter = null, IEnumerable<string> ignoreProperties = null, bool ignoreSourceNullValues = true)
         where TDestination : class, new()
     {
         if (sourceEnumerable == null)
@@ -32,7 +38,7 @@ public static class LightObjectMapper
         foreach (var sourceElem in sourceEnumerable)
         {
             var overrides = overridesGetter?.Invoke(sourceElem);
-            var destinationElem = LightObjectMapper.MapObject<TDestination>(sourceElem, propertyDataMap, overrides, null, ignoreProperties);
+            var destinationElem = LightObjectMapper.MapObject<TDestination>(sourceElem, propertyDataMap, overrides, null, ignoreProperties, ignoreSourceNullValues);
             destination.Add(destinationElem);
         }
 
@@ -67,7 +73,7 @@ public static class LightObjectMapper
 
     private static TDestination MapObject<TDestination>(
         object source, IDictionary<string, PropertyData> propertyDataMap, object overrides = null,
-        TDestination destination = null, IEnumerable<string> ignoreProperties = null)
+        TDestination destination = null, IEnumerable<string> ignoreProperties = null, bool ignoreSourceNullValues = true)
         where TDestination : class, new()
     {
         if (source == null)
@@ -89,13 +95,17 @@ public static class LightObjectMapper
             if (!LightObjectMapper.GetFromOverrides(overrides, propertyName, out sourcePropertyValue))
                 sourcePropertyValue = propertyData.sourcePropertyInfo?.GetValue(source);
 
-            if (sourcePropertyValue == null)
+            if (sourcePropertyValue == null && ignoreSourceNullValues)
                 continue;
 
             // apply type converter
-            Func<object, object> typeConverter;
-            if (LightObjectMapper.typeConverters.TryGetValue(sourcePropertyValue.GetType(), out typeConverter) && typeConverter != null)
-                sourcePropertyValue = typeConverter(sourcePropertyValue);
+            if (LightObjectMapper.typeConverters.Count > 0)
+            {
+                Func<object, object> typeConverter;
+                var propertyType = LightObjectMapper.GetPropertyType(sourcePropertyValue, propertyName, propertyData);
+                if (LightObjectMapper.typeConverters.TryGetValue(propertyType, out typeConverter) && typeConverter != null)
+                    sourcePropertyValue = typeConverter(sourcePropertyValue);
+            }
 
             // set in destination object
             propertyData.destinationPropertyInfo.SetValue(destination, sourcePropertyValue);
@@ -123,5 +133,9 @@ public static class LightObjectMapper
             out_propertyValue = overridePropertyInfo.GetValue(overrides);
             return true;
         }
+    }
+    private static Type GetPropertyType(object propertyValue, string propertyName, PropertyData propertyData)
+    {
+        return propertyValue?.GetType() ?? propertyData.sourcePropertyInfo?.PropertyType ?? propertyData.destinationPropertyInfo.PropertyType;
     }
 }
