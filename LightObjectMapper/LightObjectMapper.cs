@@ -25,7 +25,7 @@ public static class LightObjectMapper
         return LightObjectMapper.MapObject<TDestination>(source, null, overrides, ignoreProperties, true);
     }
 
-    public static IReadOnlyCollection<TDestination> MapObjects<TSource, TDestination>(
+    public static ICollection<TDestination> MapObjects<TSource, TDestination>(
         IEnumerable<TSource> sourceEnumerable, Func<TSource, object> overridesGetter = null, IEnumerable<string> ignoreProperties = null, bool ignoreSourceNullValues = true)
         where TDestination : class, new()
     {
